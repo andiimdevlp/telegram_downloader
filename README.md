@@ -17,7 +17,7 @@ Este projeto permite baixar mensagens de chats do Telegram, incluindo mídias, a
 1. Clone o repositório:
 
    ```bash
-   git clone https://github.com/seu-usuario/telegram-downloader.git
+   git clone https://github.com/andiimdevlp/telegram-downloader.git
    cd telegram-downloader
    ```
 
