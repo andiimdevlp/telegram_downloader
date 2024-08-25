@@ -51,7 +51,7 @@ Ative o ambiente virtual:
 1. Inicie o script principal:
   
   ```bash
-   python -m telegram_downloader.main
+   python3 -m telegram_downloader.main
   ```
 2. Após iniciar o script, todos os chats serão listados e salvos no arquivo `listagem_chats.txt`. Use essa listagem para escolher o ID do chat que deseja baixar.
 
@@ -72,7 +72,7 @@ As mensagens e mídias baixadas serão organizadas em uma pasta que utiliza o no
   ├── metadados_Plataforma_Cafeina.json
   ├── plano_download_Plataforma_Cafeina.json
   ├── Plataforma_Cafeina/
-  │   ├── 123456_texto.txt
+  │   ├── Plataforma_Cafeina_mensagens_texto.json
   │   ├── 123457_imagem.jpg
   │   └── 123458_video.mp4
   └── listagem_chats.txt

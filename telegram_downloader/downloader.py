@@ -8,7 +8,7 @@ from datetime import datetime
 class TelegramDownloader:
     def __init__(self, api_id, api_hash, session_name):
         self.client = TelegramClient(session_name, api_id, api_hash)
-        self.contador = 10000  
+        self.contador = 10000 
 
     async def coletar_metadados(self, chat_id, target_topic_id=None):
         """Coleta metadados das mensagens de um chat e salva em um arquivo JSON."""
@@ -27,13 +27,22 @@ class TelegramDownloader:
                     continue
                 mensagem_info = {
                     'id': msg.id,
-                    'data': msg.date.isoformat(),  
+                    'data': msg.date.isoformat(),
                     'remetente': msg.sender_id,
                     'texto': msg.message if msg.message else '',
                     'tem_midia': bool(msg.media),
-                    'media_tipo': msg.media.document.mime_type if msg.media and msg.media.document else None,
-                    'media_tamanho': msg.media.document.size if msg.media and msg.media.document else None
+                    'media_tipo': None,
+                    'media_tamanho': None
                 }
+
+                if msg.media:
+                    if hasattr(msg.media, 'document') and msg.media.document:
+                        mensagem_info['media_tipo'] = msg.media.document.mime_type
+                        mensagem_info['media_tamanho'] = msg.media.document.size
+                    elif hasattr(msg.media, 'photo') and msg.media.photo:
+                        mensagem_info['media_tipo'] = 'photo'
+                        mensagem_info['media_tamanho'] = 'Desconhecido' 
+
                 metadados.append(mensagem_info)
 
             salvar_json(metadados[::-1], f'metadados_{nome_seguro}.json')
@@ -52,6 +61,8 @@ class TelegramDownloader:
 
         print(f"Baixando mensagens do chat: {chat_id}. Total de metadados: {len(metadados)}")
 
+        mensagens_texto = []
+
         for msg in metadados:
             if msg['id'] not in ids_baixados:
                 try:
@@ -62,12 +73,14 @@ class TelegramDownloader:
                         nome_arquivo = f"{self.contador:05d} - {os.path.basename(arquivo_path)}"
                         os.rename(arquivo_path, os.path.join(pasta_chat, nome_arquivo))
                         print(f'Mídia baixada: {os.path.join(pasta_chat, nome_arquivo)}')
-                    else:
-                        if mensagem_telegram.message:
-                            nome_arquivo = f"{self.contador:05d} - {nome_arquivo_seguro(chat_titulo)}.txt"
-                            with open(os.path.join(pasta_chat, nome_arquivo), 'w', encoding='utf-8') as file:
-                                file.write(mensagem_telegram.message)
-                            print(f'Mensagem de texto salva: {os.path.join(pasta_chat, nome_arquivo)}')
+
+                    if mensagem_telegram.message and not mensagem_telegram.media:
+                        mensagens_texto.append({
+                            "id": msg['id'],
+                            "usuario": mensagem_telegram.sender_id,
+                            "datahora": mensagem_telegram.date.isoformat(),
+                            "mensagem": mensagem_telegram.message
+                        })
 
                     plano.append(msg)
                     salvar_json(plano, f'plano_download_{nome_arquivo_seguro(chat_titulo)}.json')
@@ -76,6 +89,12 @@ class TelegramDownloader:
 
                 except Exception as e:
                     print(f"Erro ao baixar mensagem {msg['id']}: {e}")
+
+        if mensagens_texto:
+            nome_arquivo_texto = f"{nome_arquivo_seguro(chat_titulo)}_mensagens_texto.json"
+            caminho_texto = os.path.join(pasta_chat, nome_arquivo_texto)
+            salvar_json(mensagens_texto, caminho_texto)
+            print(f'Mensagens de texto salvas em: {caminho_texto}')
 
     async def listar_chats(self):
         """Lista todos os chats e salva IDs em um arquivo txt."""
