@@ -41,11 +41,11 @@ class TelegramDownloader:
                         mensagem_info['media_tamanho'] = msg.media.document.size
                     elif hasattr(msg.media, 'photo') and msg.media.photo:
                         mensagem_info['media_tipo'] = 'photo'
-                        mensagem_info['media_tamanho'] = 'Desconhecido' 
+                        mensagem_info['media_tamanho'] = 'Desconhecido'
 
                 metadados.append(mensagem_info)
 
-            salvar_json(metadados[::-1], f'metadados_{nome_seguro}.json')
+            salvar_json(metadados[::-1], os.path.join(pasta_chat, f'metadados_{nome_seguro}.json'))
             print(f'Metadados das mensagens do chat "{chat_titulo}" salvos com sucesso.')
 
             await self.baixar_todas_mensagens(chat_id, chat_titulo, pasta_chat, target_topic_id)
@@ -55,8 +55,8 @@ class TelegramDownloader:
 
     async def baixar_todas_mensagens(self, chat_id, chat_titulo, pasta_chat, target_topic_id=None):
         """Baixa todas as mensagens do chat, verificando o plano de download para evitar downloads duplicados."""
-        metadados = carregar_json(f'metadados_{nome_arquivo_seguro(chat_titulo)}.json')
-        plano = carregar_json(f'plano_download_{nome_arquivo_seguro(chat_titulo)}.json')
+        metadados = carregar_json(os.path.join(pasta_chat, f'metadados_{nome_arquivo_seguro(chat_titulo)}.json'))
+        plano = carregar_json(os.path.join(pasta_chat, f'plano_download_{nome_arquivo_seguro(chat_titulo)}.json'))
         ids_baixados = {msg['id'] for msg in plano}
 
         print(f"Baixando mensagens do chat: {chat_id}. Total de metadados: {len(metadados)}")
@@ -69,10 +69,15 @@ class TelegramDownloader:
                     mensagem_telegram = await self.client.get_messages(chat_id, ids=msg['id'])
 
                     if mensagem_telegram.media:
+                        # Usar o nome original do arquivo, preservando o #
                         arquivo_path = await mensagem_telegram.download_media(file=pasta_chat)
                         nome_arquivo = f"{self.contador:05d} - {os.path.basename(arquivo_path)}"
-                        os.rename(arquivo_path, os.path.join(pasta_chat, nome_arquivo))
-                        print(f'Mídia baixada: {os.path.join(pasta_chat, nome_arquivo)}')
+                        
+                        # Corrigir para permitir # e outros caracteres especiais
+                        destino_final = os.path.join(pasta_chat, nome_arquivo)
+                        
+                        os.rename(arquivo_path, destino_final)
+                        print(f'Mídia baixada: {destino_final}')
 
                     if mensagem_telegram.message and not mensagem_telegram.media:
                         mensagens_texto.append({
@@ -83,7 +88,7 @@ class TelegramDownloader:
                         })
 
                     plano.append(msg)
-                    salvar_json(plano, f'plano_download_{nome_arquivo_seguro(chat_titulo)}.json')
+                    salvar_json(plano, os.path.join(pasta_chat, f'plano_download_{nome_arquivo_seguro(chat_titulo)}.json'))
 
                     self.contador += 1
 
@@ -99,7 +104,7 @@ class TelegramDownloader:
     async def listar_chats(self):
         """Lista todos os chats e salva IDs em um arquivo txt."""
         dialogs = await self.client.get_dialogs()
-        with open('listagem_chats.txt', 'w') as file:
+        with open('listagem_chats.txt', 'w', encoding='utf-8') as file:
             for dialog in dialogs:
                 if dialog.is_group or dialog.is_channel:
                     chat_id = dialog.entity.id

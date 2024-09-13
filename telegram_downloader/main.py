@@ -1,8 +1,13 @@
 import sys
 import os
+import asyncio
+
+# Ajuste para compatibilidade com asyncio no Windows
+if os.name == 'nt':  # Verifica se está rodando no Windows
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import asyncio
 from telegram_downloader.downloader import TelegramDownloader
 from telegram_downloader.config import API_ID, API_HASH, SESSION_NAME
 
