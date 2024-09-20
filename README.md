@@ -2,6 +2,20 @@
 
 Este projeto permite baixar mensagens de chats do Telegram, incluindo mídias, arquivos e textos, organizando-os em pastas. Ele também suporta a coleta de metadados das mensagens.
 
+## Ferramentas e Bibliotecas
+
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+
+
+* [VSCode](https://code.visualstudio.com/download) - Editor de Código
+* [Python](https://www.python.org/downloads/) - Instalador do Python
+* [telethon 1.24.0](https://pypi.org/project/Telethon/) - Biblioteca
+* [Git](https://git-scm.com/downloads) - Gerenciador de Versões
+
 ## Estrutura do Projeto
 
 - `telegram_downloader/`: Diretório principal com o código fonte.
